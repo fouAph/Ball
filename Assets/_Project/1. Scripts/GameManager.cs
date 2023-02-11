@@ -1,63 +1,103 @@
+using System;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    private GameState gameState;
+
     public static GameManager Instance;
     private void Awake()
     {
         Instance = this;
     }
 
-    [SerializeField] int goalToFill;
-    private int currentGoalCount;
-
     [SerializeField] float pushForce = 4f;
     [SerializeField] float maxDragDistance;
-    [SerializeField] Ball ball;
+    [SerializeField] GameObject ballPrefab;
     [SerializeField] Trajectory trajectory;
+    [SerializeField] Transform ballSpawnPosition;
 
-    private Camera cam;
-    private bool isDragging = false;
+    public event EventHandler onCurrentGoalCountChange;
+    public event EventHandler onCurrentAttemptCountChange;
 
-    private Vector2 startPoint;
-    private Vector2 endPoint;
-    private Vector2 direction;
-    private Vector2 force;
-    private float distance;
+    private int maxAttempt = 3;
+    private int currentAttemptCount;
+    private int previousAttemptCount;
+
+    private int goalCountToReach;
+    private int currentGoalCount = 0;
+    private int previousGoalCount;
+
+    private Ball currentBall;
+
+    [NonSerialized] Camera cam;
+    [NonSerialized] Vector2 startPoint;
+    [NonSerialized] Vector2 endPoint;
+    [NonSerialized] Vector2 direction;
+    [NonSerialized] Vector2 force;
+    [NonSerialized] float distance;
+    [NonSerialized] bool isDragging = false;
 
 
     private void Start()
     {
+        onCurrentAttemptCountChange += GameManager_OnCurrentAttemptCountChange;
+        onCurrentGoalCountChange += GameManager_OnCurrentGoalCountChange;
+        SetupGame();
+    }
+
+    private void SetupGame()
+    {
         cam = Camera.main;
-        ball.DeactiveRb();
+        SetupNewBall();
 
         var goals = FindObjectsOfType<GoalBucket>();
-        goalToFill = goals.Length;
+        goalCountToReach = goals.Length;
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (gameState == GameState.GAMEOVER || gameState == GameState.WAITING) return;
+
+        if (previousGoalCount != currentGoalCount)
         {
-            isDragging = true;
-            OnDragStart();
+            previousGoalCount = currentGoalCount;
+            print("Calling OnCurrentGoalCountChange");
+            onCurrentGoalCountChange?.Invoke(this, EventArgs.Empty);
         }
 
-        if (Input.GetKeyUp(KeyCode.Mouse0))
+        if (previousAttemptCount != currentAttemptCount)
         {
-            isDragging = false;
-            OnDragEnd();
+            previousAttemptCount = currentAttemptCount;
+            print("Calling OnCurrentAttemptCountChange");
+            onCurrentAttemptCountChange?.Invoke(this, EventArgs.Empty);
         }
 
-        if (isDragging)
-            OnDrag();
+
+        if (currentBall)
+        {
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                isDragging = true;
+                OnDragStart();
+            }
+
+            if (Input.GetKeyUp(KeyCode.Mouse0) && isDragging == true)
+            {
+                isDragging = false;
+                OnDragEnd();
+            }
+
+            if (isDragging)
+                OnDrag();
+        }
     }
 
     #region DragFunctions_Region
 
     private void OnDragStart()
     {
-        ball.DeactiveRb();
+        currentBall.DeactiveRb();
         startPoint = cam.ScreenToWorldPoint(Input.mousePosition);
         trajectory.Show();
     }
@@ -72,41 +112,76 @@ public class GameManager : MonoBehaviour
 
         Debug.DrawLine(startPoint, endPoint);
 
-        trajectory.UpdateDots(ball.pos, force);
+        trajectory.UpdateDots(currentBall.pos, force);
     }
 
     private void OnDragEnd()
     {
-        ball.ActiveRb();
-        ball.Push(force);
+        currentBall.ActiveRb();
+        currentBall.Push(force);
 
         trajectory.Hide();
+        currentAttemptCount++;
+        currentBall = null;
+        ResetDragVariableRelated();
+
+        gameState = GameState.WAITING;
+        // if (gameState != GameState.GAMEOVER || currentBall.GetCollided())
+        //     Invoke("SetupNewBall", 1f);
     }
 
+    private void ResetDragVariableRelated()
+    {
+        startPoint = Vector3.zero;
+        endPoint = Vector3.zero;
+        direction = Vector3.zero;
+        force = Vector3.zero;
+        distance = 0;
+        isDragging = false;
+    }
     #endregion
 
-    public int GetCurrentGoalCount()
+    public void SetupNewBall()
     {
-        return currentGoalCount;
-    }
-}
+        GameObject ballGo = Instantiate(ballPrefab, ballSpawnPosition.position, Quaternion.identity);
+        currentBall = ballGo.GetComponent<Ball>();
+        currentBall.DeactiveRb();
 
-public class GoalBucket : MonoBehaviour
-{
-    private Collider col;
-    private bool isFilled = false;
-    private void OnTriggerEnter2D(Collider2D other)
+        gameState = GameState.NEXT_ATTEMPT;
+    }
+
+    public void SetCurrentGoalCount()
     {
-        if (other.CompareTag("Ball"))
+        currentGoalCount++;
+    }
+
+    private void GameManager_OnCurrentAttemptCountChange(object sender, EventArgs e)
+    {
+        CheckAttemptLeft();
+    }
+
+    private void CheckAttemptLeft()
+    {
+        if (currentAttemptCount >= maxAttempt)
         {
-            OnFilled();
+            LevelFailed("Out of attempt");
         }
     }
 
-    private void OnFilled()
+    private void GameManager_OnCurrentGoalCountChange(object sender, EventArgs e)
     {
-        isFilled = true;
-        int currentGoal = GameManager.Instance.GetCurrentGoalCount();
-        currentGoal++;
+        if (currentGoalCount >= goalCountToReach)
+        {
+            Debug.Log($"You Win This Level");
+            gameState = GameState.GAMEOVER;
+        }
+    }
+
+    private void LevelFailed(string message = "")
+    {
+        Debug.Log($"Level Failed + {message}");
+        gameState = GameState.GAMEOVER;
     }
 }
+
+public enum GameState { NEXT_ATTEMPT, WAITING, GAMEOVER }

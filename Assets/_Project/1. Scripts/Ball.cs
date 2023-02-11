@@ -6,6 +6,7 @@ public class Ball : MonoBehaviour
 {
     private Rigidbody2D rb;
     private CircleCollider2D circleCollider2D;
+    private bool collided;
     public Vector3 pos { get { return transform.position; } }
     private void Awake()
     {
@@ -28,6 +29,26 @@ public class Ball : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.angularVelocity = 0;
         rb.isKinematic = true;
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (collided) return;
+        if (other.gameObject.CompareTag("Ball")) return;
+        collided = true;
+        Invoke("SetupNewBall", 1f);
+        this.enabled = false;
+    }
+
+    private void SetupNewBall()
+    {
+        GameManager.Instance.SetupNewBall();
+        print("setup new ball");
+    }
+
+    public bool GetCollided()
+    {
+        return collided;
     }
 
 }
