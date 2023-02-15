@@ -31,20 +31,21 @@ public class Ball : MonoBehaviour
         rb.isKinematic = true;
     }
 
-    private void OnCollisionEnter2D(Collision2D other)
-    {
-        if (collided) return;
-        if (other.gameObject.CompareTag("Ball")) return;
-        collided = true;
-        Invoke("SetupNewBall", 1f);
-        this.enabled = false;
-    }
+    // private void OnCollisionEnter2D(Collision2D other)
+    // {
+    //     if (collided) return;
+    //     if (other.gameObject.CompareTag("Ball")) return;
+    //     collided = true;
+    //     Invoke("SetupNewBall", 1f);
+    //     this.enabled = false;
+    // }
 
-    private void SetupNewBall()
-    {
-        GameManager.Instance.SetupNewBall();
-        print("setup new ball");
-    }
+    // private void SetupNewBall()
+    // {
+    //     if (GameManager.Instance.ballSpawnPosition)
+    //         GameManager.Instance.SetupNewBall();
+    //     print("setup new ball");
+    // }
 
     public bool GetCollided()
     {

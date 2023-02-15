@@ -1,26 +1,26 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    private GameState gameState;
-
+    [SerializeField] GameState gameState;
+    private BallSpawner ballSpawner;
     public static GameManager Instance;
     private void Awake()
     {
         Instance = this;
+
     }
 
+    [SerializeField] int maxAttempt = 3;
     [SerializeField] float pushForce = 4f;
     [SerializeField] float maxDragDistance;
-    [SerializeField] GameObject ballPrefab;
     [SerializeField] Trajectory trajectory;
-    [SerializeField] Transform ballSpawnPosition;
 
     public event EventHandler onCurrentGoalCountChange;
     public event EventHandler onCurrentAttemptCountChange;
 
-    private int maxAttempt = 3;
     private int currentAttemptCount;
     private int previousAttemptCount;
 
@@ -41,15 +41,17 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        ballSpawner = FindObjectOfType<BallSpawner>();
+        currentAttemptCount = maxAttempt;
         onCurrentAttemptCountChange += GameManager_OnCurrentAttemptCountChange;
         onCurrentGoalCountChange += GameManager_OnCurrentGoalCountChange;
         SetupGame();
     }
 
-    private void SetupGame()
+    public void SetupGame()
     {
         cam = Camera.main;
-        SetupNewBall();
+        PrepareNewBall();
 
         var goals = FindObjectsOfType<GoalBucket>();
         goalCountToReach = goals.Length;
@@ -121,13 +123,45 @@ public class GameManager : MonoBehaviour
         currentBall.Push(force);
 
         trajectory.Hide();
-        currentAttemptCount++;
+        currentAttemptCount--;
         currentBall = null;
         ResetDragVariableRelated();
 
         gameState = GameState.WAITING;
-        // if (gameState != GameState.GAMEOVER || currentBall.GetCollided())
-        //     Invoke("SetupNewBall", 1f);
+
+        if (CheckOutOfBall())
+        {
+            //initiate GameOver
+            print("Initiate game over");
+            StartCoroutine(InitiateGameOver());
+        }
+        else
+        {
+            //Spawn New Ball
+            print("Spawn New Ball");
+            StartCoroutine(SpawnNewBall());
+        }
+    }
+
+    private IEnumerator SpawnNewBall()
+    {
+        float waitTime = 3f;
+        yield return new WaitForSeconds(waitTime);
+        PrepareNewBall();
+    }
+
+    private IEnumerator InitiateGameOver()
+    {
+        float waitTime = 3f;
+        yield return new WaitForSeconds(waitTime);
+        // print("GameOver");
+        LevelFailed("You Lose");
+        yield return null;
+    }
+
+    private bool CheckOutOfBall()
+    {
+        return currentAttemptCount == 0;
     }
 
     private void ResetDragVariableRelated()
@@ -141,14 +175,15 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    public void SetupNewBall()
+    public void PrepareNewBall()
     {
-        GameObject ballGo = Instantiate(ballPrefab, ballSpawnPosition.position, Quaternion.identity);
+        GameObject ballGo = ballSpawner.SpawnBall();
         currentBall = ballGo.GetComponent<Ball>();
         currentBall.DeactiveRb();
 
         gameState = GameState.NEXT_ATTEMPT;
     }
+
 
     public void SetCurrentGoalCount()
     {
@@ -157,16 +192,17 @@ public class GameManager : MonoBehaviour
 
     private void GameManager_OnCurrentAttemptCountChange(object sender, EventArgs e)
     {
-        CheckAttemptLeft();
+        // CheckAttemptLeft();
     }
 
     private void CheckAttemptLeft()
     {
-        if (currentAttemptCount >= maxAttempt)
+        if (currentAttemptCount <= 0)
         {
             LevelFailed("Out of attempt");
         }
     }
+
 
     private void GameManager_OnCurrentGoalCountChange(object sender, EventArgs e)
     {
@@ -174,6 +210,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log($"You Win This Level");
             gameState = GameState.GAMEOVER;
+            StopCoroutine(InitiateGameOver());
         }
     }
 
@@ -181,6 +218,16 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log($"Level Failed + {message}");
         gameState = GameState.GAMEOVER;
+    }
+
+    public int GetMaxAttempt()
+    {
+        return maxAttempt;
+    }
+
+    public int GetCurrentAttemptCount()
+    {
+        return currentAttemptCount;
     }
 }
 
