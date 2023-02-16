@@ -10,7 +10,6 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-
     }
 
     [SerializeField] int maxAttempt = 3;
@@ -184,7 +183,6 @@ public class GameManager : MonoBehaviour
         gameState = GameState.NEXT_ATTEMPT;
     }
 
-
     public void SetCurrentGoalCount()
     {
         currentGoalCount++;
@@ -202,7 +200,6 @@ public class GameManager : MonoBehaviour
             LevelFailed("Out of attempt");
         }
     }
-
 
     private void GameManager_OnCurrentGoalCountChange(object sender, EventArgs e)
     {
