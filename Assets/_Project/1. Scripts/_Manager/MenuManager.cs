@@ -2,26 +2,31 @@ using UnityEngine;
 
 public class MenuManager : MonoBehaviour
 {
-    public static MenuManager Singleton;
+    public static MenuManager Instance;
     [SerializeField] Menu[] menus;
 
-    public string currentMenu;
-    public string previousMenu;
+    [SerializeField] string currentMenu;
+    [SerializeField] string previousMenu;
+
     private void Awake()
     {
-        if (Singleton != null)
+        if (Instance != null)
         {
-            Debug.LogWarning("More than one Instance of " + Singleton.GetType());
-            Debug.LogWarning("Destroying " + Singleton.name);
-            DestroyImmediate(Singleton.gameObject);
+            Debug.LogWarning("More than one Instance of " + Instance.GetType());
+            Debug.LogWarning("Destroying " + Instance.name);
+            DestroyImmediate(Instance.gameObject);
         }
 
-        Singleton = this;
+        Instance = this;
     }
 
-    public AudioClip selectMenuClip;
-    public AudioClip exitSelectMenuClip;
-    public AudioClip clickMenuClip;
+    [SerializeField] AudioClip selectMenuClip;
+    [SerializeField] AudioClip exitSelectMenuClip;
+    [SerializeField] AudioClip clickMenuClip;
+
+    [Space(10)]
+    [SerializeField] Transform levelButtonPrefab;
+    [SerializeField] Transform levelSelectContainer;
 
     // AudioPoolSystem audioPoolSystem;
 
@@ -29,6 +34,16 @@ public class MenuManager : MonoBehaviour
     {
         // audioPoolSystem = AudioPoolSystem.Singleton;
         OpenMenu("main");
+        // SpawnLevelButton();
+    }
+
+    public void SpawnLevelButton()
+    {
+        for (int i = 0; i < GameManager.Instance.GetLevelInfoSOList().Length; i++)
+        {
+            var go = Instantiate(levelButtonPrefab, levelSelectContainer);
+            go.GetComponent<LevelInfoButtonHelper>().levelInfoScriptablebject = GameManager.Instance.GetLevelInfoSOList()[i];
+        }
     }
 
     public void OnSelectMenu()

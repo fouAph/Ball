@@ -1,21 +1,21 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     [SerializeField] GameState gameState;
-    private BallSpawner ballSpawner;
+    [SerializeField] private BallSpawner ballSpawner;
     public static GameManager Instance;
     private void Awake()
     {
         Instance = this;
     }
-
-    [SerializeField] int maxAttempt = 3;
-    [SerializeField] float pushForce = 4f;
-    [SerializeField] float maxDragDistance;
-    [SerializeField] Trajectory trajectory;
+    [SerializeField] GameSceneManager gameSceneManager;
+    [Header("Important Variables")]
+    public GameSettings gameSettings;
+    [SerializeField] LevelInfoSO[] levelInfoSOList;
 
     public event EventHandler onCurrentGoalCountChange;
     public event EventHandler onCurrentAttemptCountChange;
@@ -40,21 +40,34 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        ballSpawner = FindObjectOfType<BallSpawner>();
-        currentAttemptCount = maxAttempt;
+        currentAttemptCount = gameSettings.maxAttempt;
         onCurrentAttemptCountChange += GameManager_OnCurrentAttemptCountChange;
         onCurrentGoalCountChange += GameManager_OnCurrentGoalCountChange;
-        SetupGame();
+        // SetupGame();
+        MenuManager.Instance.SpawnLevelButton();
     }
+
+    List<AsyncOperation> sceneLoading = new List<AsyncOperation>();
+    private void LoadGame()
+    {
+
+    }
+
+    #region GameLoop
 
     public void SetupGame()
     {
+        ballSpawner = FindObjectOfType<BallSpawner>();
+
         cam = Camera.main;
         PrepareNewBall();
 
         var goals = FindObjectsOfType<GoalBucket>();
         goalCountToReach = goals.Length;
     }
+
+    #endregion
+
 
     private void Update()
     {
@@ -66,14 +79,6 @@ public class GameManager : MonoBehaviour
             print("Calling OnCurrentGoalCountChange");
             onCurrentGoalCountChange?.Invoke(this, EventArgs.Empty);
         }
-
-        if (previousAttemptCount != currentAttemptCount)
-        {
-            previousAttemptCount = currentAttemptCount;
-            print("Calling OnCurrentAttemptCountChange");
-            onCurrentAttemptCountChange?.Invoke(this, EventArgs.Empty);
-        }
-
 
         if (currentBall)
         {
@@ -100,20 +105,20 @@ public class GameManager : MonoBehaviour
     {
         currentBall.DeactiveRb();
         startPoint = cam.ScreenToWorldPoint(Input.mousePosition);
-        trajectory.Show();
+        gameSettings.trajectory.Show();
     }
 
     private void OnDrag()
     {
         endPoint = cam.ScreenToWorldPoint(Input.mousePosition);
         distance = Vector2.Distance(startPoint, endPoint);
-        distance = Mathf.Clamp(distance, 0, maxDragDistance);
+        distance = Mathf.Clamp(distance, 0, gameSettings.maxDragDistance);
         direction = (startPoint - endPoint).normalized;
-        force = direction * distance * pushForce;
+        force = direction * distance * gameSettings.pushForce;
 
         Debug.DrawLine(startPoint, endPoint);
 
-        trajectory.UpdateDots(currentBall.pos, force);
+        gameSettings.trajectory.UpdateDots(currentBall.pos, force);
     }
 
     private void OnDragEnd()
@@ -121,10 +126,12 @@ public class GameManager : MonoBehaviour
         currentBall.ActiveRb();
         currentBall.Push(force);
 
-        trajectory.Hide();
+        gameSettings.trajectory.Hide();
         currentAttemptCount--;
         currentBall = null;
         ResetDragVariableRelated();
+
+        onCurrentAttemptCountChange?.Invoke(this, EventArgs.Empty);
 
         gameState = GameState.WAITING;
 
@@ -176,6 +183,8 @@ public class GameManager : MonoBehaviour
 
     public void PrepareNewBall()
     {
+        // if (ballSpawner)
+
         GameObject ballGo = ballSpawner.SpawnBall();
         currentBall = ballGo.GetComponent<Ball>();
         currentBall.DeactiveRb();
@@ -219,13 +228,34 @@ public class GameManager : MonoBehaviour
 
     public int GetMaxAttempt()
     {
-        return maxAttempt;
+        return gameSettings.maxAttempt;
     }
 
     public int GetCurrentAttemptCount()
     {
         return currentAttemptCount;
     }
+
+    public LevelInfoSO[] GetLevelInfoSOList()
+    {
+        return levelInfoSOList;
+    }
+
+    public GameSceneManager GetGameSceneManager()
+    {
+        return gameSceneManager;
+    }
 }
 
 public enum GameState { NEXT_ATTEMPT, WAITING, GAMEOVER }
+
+[System.Serializable]
+public class GameSettings
+{
+    public int maxAttempt = 3;
+    public float pushForce = 4f;
+    public float maxDragDistance = 3;
+    public Trajectory trajectory;
+
+}
+
