@@ -9,6 +9,12 @@ public class GameHUD : MonoBehaviour
     [SerializeField] Transform ballLifeUIPrefab;
 
     private GameManager gameManager;
+
+    private void OnDisable()
+    {
+        gameManager.onCurrentAttemptCountChange -= UpdateBallsLifeUI_OnCurrentAttemptCountChange;
+    }
+    
     private void Start()
     {
         gameManager = GameManager.Instance;

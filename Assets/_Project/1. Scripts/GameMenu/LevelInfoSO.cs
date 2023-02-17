@@ -23,6 +23,11 @@ public class LevelInfoSO : ScriptableObject
         return levelBuildIndex;
     }
 
+    public void SetLevelBuildIndex(int index)
+    {
+        levelBuildIndex = index;
+    }
+
     public string GetLevelName()
     {
         return levelName;

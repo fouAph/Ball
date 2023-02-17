@@ -5,13 +5,16 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] GameState gameState;
+    [SerializeField] GameState currentGameState;
+    [SerializeField] int currentLevelIndex;
     [SerializeField] private BallSpawner ballSpawner;
     public static GameManager Instance;
+
     private void Awake()
     {
         Instance = this;
     }
+
     [SerializeField] GameSceneManager gameSceneManager;
     [Header("Important Variables")]
     public GameSettings gameSettings;
@@ -19,6 +22,10 @@ public class GameManager : MonoBehaviour
 
     public event EventHandler onCurrentGoalCountChange;
     public event EventHandler onCurrentAttemptCountChange;
+
+    public event EventHandler onGameLose;
+    public event EventHandler onGameWin;
+
 
     private int currentAttemptCount;
     private int previousAttemptCount;
@@ -44,41 +51,25 @@ public class GameManager : MonoBehaviour
         onCurrentAttemptCountChange += GameManager_OnCurrentAttemptCountChange;
         onCurrentGoalCountChange += GameManager_OnCurrentGoalCountChange;
         // SetupGame();
-        MenuManager.Instance.SpawnLevelButton();
+        // MenuManager.Instance.SpawnLevelButton();
     }
 
-    List<AsyncOperation> sceneLoading = new List<AsyncOperation>();
-    private void LoadGame()
+    public void Resetlevel()
     {
-
+        currentAttemptCount = gameSettings.maxAttempt;
     }
-
-    #region GameLoop
-
-    public void SetupGame()
-    {
-        ballSpawner = FindObjectOfType<BallSpawner>();
-
-        cam = Camera.main;
-        PrepareNewBall();
-
-        var goals = FindObjectsOfType<GoalBucket>();
-        goalCountToReach = goals.Length;
-    }
-
-    #endregion
-
 
     private void Update()
     {
-        if (gameState == GameState.GAMEOVER || gameState == GameState.WAITING) return;
-
         if (previousGoalCount != currentGoalCount)
         {
+            if (currentGameState == GameState.GAMEOVER_Lose) return;
+
             previousGoalCount = currentGoalCount;
-            print("Calling OnCurrentGoalCountChange");
             onCurrentGoalCountChange?.Invoke(this, EventArgs.Empty);
         }
+
+        if (currentGameState != GameState.NEXT_ATTEMPT) return;
 
         if (currentBall)
         {
@@ -98,6 +89,46 @@ public class GameManager : MonoBehaviour
                 OnDrag();
         }
     }
+
+    #region GameLoadFuntions
+    private void LoadGame()
+    {
+
+    }
+    #endregion
+
+    #region GameLoop
+    public void Retry_OnButtonClick()
+    {
+        gameSceneManager.RetryLevel();
+        Resetlevel();
+
+    }
+
+    public void NextLevel_OnButtonClick()
+    {
+        gameSceneManager.LoadNextLevel();
+        Resetlevel();
+    }
+
+    public void MainMenu_OnButtonClick()
+    {
+        SceneManager.UnloadSceneAsync(currentLevelIndex);
+        SceneManager.LoadSceneAsync((int)SceneIndexes.TITLE_SCREEN, LoadSceneMode.Additive);
+    }
+
+    public void SetupGame()
+    {
+        ballSpawner = FindObjectOfType<BallSpawner>();
+        print("ball spawn");
+        cam = Camera.main;
+        PrepareNewBall();
+
+        var goals = FindObjectsOfType<GoalBucket>();
+        goalCountToReach = goals.Length;
+    }
+
+    #endregion
 
     #region DragFunctions_Region
 
@@ -133,13 +164,15 @@ public class GameManager : MonoBehaviour
 
         onCurrentAttemptCountChange?.Invoke(this, EventArgs.Empty);
 
-        gameState = GameState.WAITING;
+        currentGameState = GameState.WAITING;
 
         if (CheckOutOfBall())
         {
             //initiate GameOver
+            if (currentGameState == GameState.GAMEOVER_WIN) return;
+
             print("Initiate game over");
-            StartCoroutine(InitiateGameOver());
+            StartCoroutine(InitiateGameLose());
         }
         else
         {
@@ -156,13 +189,15 @@ public class GameManager : MonoBehaviour
         PrepareNewBall();
     }
 
-    private IEnumerator InitiateGameOver()
+    private IEnumerator InitiateGameLose()
     {
-        float waitTime = 3f;
-        yield return new WaitForSeconds(waitTime);
+        yield return new WaitForSeconds(gameSettings.waitTimeWhenOutofBall);
         // print("GameOver");
-        LevelFailed("You Lose");
-        yield return null;
+        if (currentGameState != GameState.GAMEOVER_WIN)
+        {
+            LevelFailed("Out of attempt");
+            onGameLose?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private bool CheckOutOfBall()
@@ -186,15 +221,12 @@ public class GameManager : MonoBehaviour
         // if (ballSpawner)
 
         GameObject ballGo = ballSpawner.SpawnBall();
+        ballGo.transform.parent = UIManager.Instance.transform;
+        ballGo.transform.parent = null;
         currentBall = ballGo.GetComponent<Ball>();
         currentBall.DeactiveRb();
 
-        gameState = GameState.NEXT_ATTEMPT;
-    }
-
-    public void SetCurrentGoalCount()
-    {
-        currentGoalCount++;
+        currentGameState = GameState.NEXT_ATTEMPT;
     }
 
     private void GameManager_OnCurrentAttemptCountChange(object sender, EventArgs e)
@@ -202,29 +234,26 @@ public class GameManager : MonoBehaviour
         // CheckAttemptLeft();
     }
 
-    private void CheckAttemptLeft()
-    {
-        if (currentAttemptCount <= 0)
-        {
-            LevelFailed("Out of attempt");
-        }
-    }
-
     private void GameManager_OnCurrentGoalCountChange(object sender, EventArgs e)
     {
         if (currentGoalCount >= goalCountToReach)
         {
             Debug.Log($"You Win This Level");
-            gameState = GameState.GAMEOVER;
-            StopCoroutine(InitiateGameOver());
+            currentGameState = GameState.GAMEOVER_WIN;
+            onGameWin?.Invoke(this, EventArgs.Empty);
+            StopAllCoroutines();
         }
     }
 
     private void LevelFailed(string message = "")
     {
         Debug.Log($"Level Failed + {message}");
-        gameState = GameState.GAMEOVER;
+        currentGameState = GameState.GAMEOVER_Lose;
+        onGameLose?.Invoke(this, EventArgs.Empty);
     }
+
+    #region Getter Setter Functions
+    #region Getter
 
     public int GetMaxAttempt()
     {
@@ -245,13 +274,39 @@ public class GameManager : MonoBehaviour
     {
         return gameSceneManager;
     }
+
+    public GameState GetCurrentGameState()
+    {
+        return currentGameState;
+    }
+
+    public int GetCurrentLevelIndex()
+    {
+        return currentLevelIndex;
+    }
+    #endregion
+    #region Setter
+    public void SetcurrentLevelIndex(int index)
+    {
+        currentLevelIndex = index;
+    }
+
+    public void SetCurrentGoalCount()
+    {
+        currentGoalCount++;
+    }
+    #endregion
+    #endregion
+
 }
 
-public enum GameState { NEXT_ATTEMPT, WAITING, GAMEOVER }
+public enum GameState { NEXT_ATTEMPT, WAITING, GAMEOVER_WIN, GAMEOVER_Lose }
 
 [System.Serializable]
 public class GameSettings
 {
+    public float waitTimeWhenOutofBall = 5f;
+
     public int maxAttempt = 3;
     public float pushForce = 4f;
     public float maxDragDistance = 3;

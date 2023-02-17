@@ -28,13 +28,19 @@ public class MenuManager : MonoBehaviour
     [SerializeField] Transform levelButtonPrefab;
     [SerializeField] Transform levelSelectContainer;
 
+
+
     // AudioPoolSystem audioPoolSystem;
 
     private void Start()
     {
         // audioPoolSystem = AudioPoolSystem.Singleton;
         OpenMenu("main");
-        // SpawnLevelButton();
+    }
+
+    private void OnEnable()
+    {
+        SpawnLevelButton();
     }
 
     public void SpawnLevelButton()
@@ -42,7 +48,9 @@ public class MenuManager : MonoBehaviour
         for (int i = 0; i < GameManager.Instance.GetLevelInfoSOList().Length; i++)
         {
             var go = Instantiate(levelButtonPrefab, levelSelectContainer);
-            go.GetComponent<LevelInfoButtonHelper>().levelInfoScriptablebject = GameManager.Instance.GetLevelInfoSOList()[i];
+            LevelInfoButtonHelper info = go.GetComponent<LevelInfoButtonHelper>();
+            info.levelInfoScriptablebject = GameManager.Instance.GetLevelInfoSOList()[i];
+            info.levelInfoScriptablebject.SetLevelBuildIndex(i + 2);
         }
     }
 
@@ -108,4 +116,5 @@ public class MenuManager : MonoBehaviour
     {
         OpenMenu(previousMenu);
     }
+
 }
