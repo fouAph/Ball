@@ -14,6 +14,13 @@ public class UIManager : MonoBehaviour
     [SerializeField] GameObject levelWinPopup;
     [SerializeField] GameObject levelFailedPopup;
 
+    [SerializeField] Transform starsContainer;
+    [SerializeField] Transform filledStarPrefab;
+    [SerializeField] Transform emptyStarPrefab;
+
+    [SerializeField] TMPro.TMP_Text gameOverTxt;
+    [SerializeField] string[] winTexts;
+    [SerializeField] string[] loseTexts;
     // [SerializeField] Button retryButton;
     // [SerializeField] Button mainMenuButton;
     // [SerializeField] Button nextLevelButton;
@@ -51,16 +58,19 @@ public class UIManager : MonoBehaviour
     {
         GameManager.Instance.NextLevel_OnButtonClick();
     }
+
     public void ShowGameOverPopup_OnGameLose(object sender, EventArgs e)
     {
         HideLevelWinPopup();
         ShowLevelFailedPopup();
+        SpawnStars();
     }
 
     public void ShowGameOverPopup_OnGameWin(object sender, EventArgs e)
     {
         HideLevelFailedPopup();
         ShowLevelWinPopup();
+        SpawnStars();
     }
 
     private void ShowLevelWinPopup()
@@ -87,5 +97,33 @@ public class UIManager : MonoBehaviour
     {
         levelFailedPopup.SetActive(false);
         levelFailedPopup.transform.parent.gameObject.SetActive(false);
+    }
+
+    private void SpawnStars()
+    {
+        int count = 0;
+        for (int i = 0; i < starsContainer.childCount; i++)
+        {
+            if (count < GameManager.Instance.GetStarsResult())
+            {
+                Instantiate(filledStarPrefab, starsContainer.GetChild(i));
+            }
+
+            else
+            {
+                Instantiate(emptyStarPrefab, starsContainer.GetChild(i));
+            }
+            count++;
+        }
+
+        if (GameManager.Instance.GetCurrentGameState() == GameState.GAMEOVER_WIN)
+        {
+            gameOverTxt.text = winTexts[UnityEngine.Random.Range(0, winTexts.Length)];
+        }
+
+        else if (GameManager.Instance.GetCurrentGameState() == GameState.GAMEOVER_Lose)
+        {
+            gameOverTxt.text = loseTexts[UnityEngine.Random.Range(0, winTexts.Length)];
+        }
     }
 }
