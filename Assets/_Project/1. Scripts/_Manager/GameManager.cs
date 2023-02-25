@@ -267,7 +267,13 @@ public class GameManager : MonoBehaviour
     private void OnGameWin_Event(object sender, EventArgs e)
     {
         levelInfoSOList[currentLevelSOIndex].SetStarScore(currentLevelStarScore);
-        levelInfoSOList[nextLevelSOIndex].SetIsUnlocked(true);
+        if (levelInfoSOList.Length > nextLevelSOIndex)
+            levelInfoSOList[nextLevelSOIndex].SetIsUnlocked(true);
+
+        else
+        {
+            //TODO : Change "Next Level Button To Main Menu Button
+        }
     }
 
     private void LevelFailed(string message = "")

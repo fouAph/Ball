@@ -15,8 +15,8 @@ MonoBehaviour:
   levelBuildIndex: 4
   levelName: Level 3
   maxDragDistance: 3
-  levelMaxAttempt: 3
-  pushForce: 4
+  levelMaxAttempt: 5
+  pushForce: 6
   isUnlocked: 1
   difficulityLevel: 0
-  starScore: 2
+  starScore: 1

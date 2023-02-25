@@ -184,6 +184,7 @@ GameObject:
   m_Component:
   - component: {fileID: 271288800}
   - component: {fileID: 271288799}
+  - component: {fileID: 271288801}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -205,6 +206,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentGameState: 0
   currentLevelIndex: 0
+  ballSpawner: {fileID: 0}
   gameSceneManager:
     loadingUIPanel: {fileID: 1666730978}
   gameSettings:
@@ -222,6 +224,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 559b3ba4f7e0ec34c887a8da195de79c, type: 2}
   - {fileID: 11400000, guid: fc15c3363d2ab494cb42ced8fa6ec051, type: 2}
   - {fileID: 11400000, guid: 60dde5ff44c5cf54d94ab290942dccb5, type: 2}
+  CurrentBall: {fileID: 0}
   distance: 0
 --- !u!4 &271288800
 Transform:
@@ -239,6 +242,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &271288801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 271288798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7edad760ce51c54a88eab8396b8dfce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  checkInterval: 0.5
+  currentFrameRate: 0
 --- !u!1 &394811026
 GameObject:
   m_ObjectHideFlags: 0

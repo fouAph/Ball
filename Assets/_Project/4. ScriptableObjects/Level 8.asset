@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e16e2a8cacf8c414c9519b8d30c25583, type: 3}
-  m_Name: Level 2
+  m_Name: Level 8
   m_EditorClassIdentifier: 
-  levelBuildIndex: 3
-  levelName: Level 2
+  levelBuildIndex: 8
+  levelName: Level 8
   maxDragDistance: 3
-  levelMaxAttempt: 4
-  pushForce: 5
-  isUnlocked: 1
+  levelMaxAttempt: 3
+  pushForce: 4.7
+  isUnlocked: 0
   difficulityLevel: 0
-  starScore: 2
+  starScore: 0
