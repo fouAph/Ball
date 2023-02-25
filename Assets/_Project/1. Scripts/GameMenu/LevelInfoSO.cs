@@ -5,10 +5,14 @@ public class LevelInfoSO : ScriptableObject
 {
     [SerializeField] int levelBuildIndex;
     [SerializeField] string levelName;
-    [SerializeField] bool isUnlocked;
-    [SerializeField] int levelMaxAttempt;
-    [SerializeField] DifficulityLevel difficulityLevel;
 
+    [Header("Game Settings")]
+    [SerializeField] float maxDragDistance = 3;
+    [SerializeField] int levelMaxAttempt = 3;
+    [SerializeField] float pushForce;
+    [SerializeField] bool isUnlocked;
+    [SerializeField] DifficulityLevel difficulityLevel;
+    [SerializeField] int starScore = 0;
     private void OnEnable()
     {
         if (this.name != levelName)
@@ -21,6 +25,13 @@ public class LevelInfoSO : ScriptableObject
     public int GetLevelBuildIndex()
     {
         return levelBuildIndex;
+    }
+
+    public void SetupGameSettings(GameManager gameManager)
+    {
+        gameManager.gameSettings.maxDragDistance = maxDragDistance;
+        gameManager.gameSettings.maxAttempt = levelMaxAttempt;
+        gameManager.gameSettings.pushForce = pushForce;
     }
 
     public void SetLevelBuildIndex(int index)
@@ -36,6 +47,11 @@ public class LevelInfoSO : ScriptableObject
     public bool GetIsUnlocked()
     {
         return isUnlocked;
+    }
+
+    public void SetIsUnlocked(bool unlock)
+    {
+        isUnlocked = unlock;
     }
 
     public int GetLevelMaxAttempt()
@@ -55,4 +71,13 @@ public class LevelInfoSO : ScriptableObject
 
     private enum DifficulityLevel { EASY, MEDIUM, HARD }
 
+    public int GetStarScore()
+    {
+        return starScore;
+    }
+
+    public void SetStarScore(int score)
+    {
+        starScore = score;
+    }
 }

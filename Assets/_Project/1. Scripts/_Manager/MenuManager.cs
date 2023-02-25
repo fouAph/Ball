@@ -47,10 +47,12 @@ public class MenuManager : MonoBehaviour
     {
         for (int i = 0; i < GameManager.Instance.GetLevelInfoSOList().Length; i++)
         {
+            //if an error directing to this script, then Disable LevelSelect_Menu Gameobject on MainMenu Scene inside Canvas 
             var go = Instantiate(levelButtonPrefab, levelSelectContainer);
             LevelInfoButtonHelper info = go.GetComponent<LevelInfoButtonHelper>();
             info.levelInfoScriptablebject = GameManager.Instance.GetLevelInfoSOList()[i];
             info.levelInfoScriptablebject.SetLevelBuildIndex(i + 2);
+            info.SpawnStars();
         }
     }
 

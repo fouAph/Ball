@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelBuildIndex: 8
   levelName: Level 7
-  isUnlocked: 1
+  isUnlocked: 0
   levelMaxAttempt: 3
   difficulityLevel: 0

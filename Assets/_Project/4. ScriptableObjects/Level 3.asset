@@ -12,8 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e16e2a8cacf8c414c9519b8d30c25583, type: 3}
   m_Name: Level 3
   m_EditorClassIdentifier: 
-  levelBuildIndex: 2
+  levelBuildIndex: 4
   levelName: Level 3
-  isUnlocked: 0
+  maxDragDistance: 3
   levelMaxAttempt: 3
+  pushForce: 4
+  isUnlocked: 1
   difficulityLevel: 0
+  starScore: 2

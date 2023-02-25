@@ -15,15 +15,12 @@ public class UIManager : MonoBehaviour
     [SerializeField] GameObject levelFailedPopup;
 
     [SerializeField] Transform starsContainer;
-    [SerializeField] Transform filledStarPrefab;
-    [SerializeField] Transform emptyStarPrefab;
+    [SerializeField] Sprite emptyStarSprite;
+    [SerializeField] Sprite filledStarSprite;
 
     [SerializeField] TMPro.TMP_Text gameOverTxt;
     [SerializeField] string[] winTexts;
     [SerializeField] string[] loseTexts;
-    // [SerializeField] Button retryButton;
-    // [SerializeField] Button mainMenuButton;
-    // [SerializeField] Button nextLevelButton;
 
     private void Start()
     {
@@ -104,26 +101,18 @@ public class UIManager : MonoBehaviour
         int count = 0;
         for (int i = 0; i < starsContainer.childCount; i++)
         {
-            if (count < GameManager.Instance.GetStarsResult())
+            Image img = starsContainer.GetChild(i).GetComponent<Image>();
+           if (count <  GameManager.Instance.GetStarsResult())
             {
-                Instantiate(filledStarPrefab, starsContainer.GetChild(i));
+                img.sprite = filledStarSprite;
             }
 
             else
             {
-                Instantiate(emptyStarPrefab, starsContainer.GetChild(i));
+                img.sprite = emptyStarSprite;
             }
+  
             count++;
-        }
-
-        if (GameManager.Instance.GetCurrentGameState() == GameState.GAMEOVER_WIN)
-        {
-            gameOverTxt.text = winTexts[UnityEngine.Random.Range(0, winTexts.Length)];
-        }
-
-        else if (GameManager.Instance.GetCurrentGameState() == GameState.GAMEOVER_Lose)
-        {
-            gameOverTxt.text = loseTexts[UnityEngine.Random.Range(0, winTexts.Length)];
         }
     }
 }
