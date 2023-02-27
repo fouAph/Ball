@@ -204,11 +204,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bc9bee356ca1664a8efd28f74d0c71f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentGameState: 0
-  currentLevelIndex: 0
-  ballSpawner: {fileID: 0}
-  gameSceneManager:
-    loadingUIPanel: {fileID: 1666730978}
   gameSettings:
     waitTimeWhenOutofBall: 5
     maxAttempt: 3
@@ -216,6 +211,11 @@ MonoBehaviour:
     maxDragDistance: 3
     minimumDragPercent: 0.2
     trajectory: {fileID: 102413897}
+  currentGameState: 0
+  ballPrefab: {fileID: 3536222319444266082, guid: 563cc7c492268e64482b80545e4a73b4, type: 3}
+  UIManagerPrefab: {fileID: 5907381923753954039, guid: 14e8859104ca4b14fa51b46c1aa1af13, type: 3}
+  gameSceneManager:
+    loadingUIPanel: {fileID: 1666730978}
   levelInfoSOList:
   - {fileID: 11400000, guid: 4f8bc6565f69e1144802dd561186565a, type: 2}
   - {fileID: 11400000, guid: a2d2588775771a1419e3c557745b806f, type: 2}
@@ -224,7 +224,31 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 559b3ba4f7e0ec34c887a8da195de79c, type: 2}
   - {fileID: 11400000, guid: fc15c3363d2ab494cb42ced8fa6ec051, type: 2}
   - {fileID: 11400000, guid: 60dde5ff44c5cf54d94ab290942dccb5, type: 2}
+  - {fileID: 11400000, guid: 9bb2ae5166e9674498d8455d795e1f70, type: 2}
+  - {fileID: 11400000, guid: 3a6242420b7ff644d946efac5e879163, type: 2}
+  - {fileID: 11400000, guid: 25b9e85132b7a754f9ef77c17aae9875, type: 2}
+  - {fileID: 11400000, guid: 9ac160983532fac458e3c2173eadbc5d, type: 2}
+  - {fileID: 11400000, guid: c42398bd0aa723145a33bd84c208a750, type: 2}
   CurrentBall: {fileID: 0}
+  saveName: save
+  saveData:
+    profile:
+      playerName: 
+    levels:
+    - starScore: 0
+      isUnlocked: 1
+    - starScore: 3
+      isUnlocked: 0
+    - starScore: 0
+      isUnlocked: 0
+    - starScore: 0
+      isUnlocked: 0
+    - starScore: 0
+      isUnlocked: 0
+    - starScore: 0
+      isUnlocked: 0
+    - starScore: 0
+      isUnlocked: 0
   distance: 0
 --- !u!4 &271288800
 Transform:

@@ -17,6 +17,6 @@ MonoBehaviour:
   maxDragDistance: 3
   levelMaxAttempt: 5
   pushForce: 5
-  isUnlocked: 1
+  isUnlocked: 0
   difficulityLevel: 0
-  starScore: 1
+  starScore: 0

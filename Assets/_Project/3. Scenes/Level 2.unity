@@ -2130,7 +2130,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5907381923753954035, guid: 14e8859104ca4b14fa51b46c1aa1af13, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5907381923753954039, guid: 14e8859104ca4b14fa51b46c1aa1af13, type: 3}
       propertyPath: m_Pivot.x
@@ -2444,6 +2444,10 @@ PrefabInstance:
     - target: {fileID: 6328922894634096904, guid: 9b45f012341eb0641bb9c2f7d24a8f09, type: 3}
       propertyPath: m_Name
       value: BallSpawner
+      objectReference: {fileID: 0}
+    - target: {fileID: 6328922894634096904, guid: 9b45f012341eb0641bb9c2f7d24a8f09, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6328922894634096906, guid: 9b45f012341eb0641bb9c2f7d24a8f09, type: 3}
       propertyPath: ballSpawnPosition

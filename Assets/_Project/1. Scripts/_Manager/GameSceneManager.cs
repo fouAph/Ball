@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +13,8 @@ public class GameSceneManager
     {
         Instance = this;
     }
+
+    public event EventHandler onLevelLoaded;
 
     [SerializeField] GameObject loadingUIPanel;
     List<AsyncOperation> sceneLoading = new List<AsyncOperation>();
@@ -29,6 +32,8 @@ public class GameSceneManager
         // StartCoroutine(SetupGameReference());
         // StartCoroutine(StartGameCountdown());
     }
+
+
 
     public void RetryLevel()
     {
@@ -53,8 +58,10 @@ public class GameSceneManager
             }
         }
 
+        Debug.Log("Game Loaded");
         yield return new WaitForSeconds(.1f);
-        GameManager.Instance.SetupGame();
+        GameManager.Instance.PrepareGameLevel();
+        // GameManager.Instance.SetupGame();
         yield return new WaitForSeconds(1f);
         loadingUIPanel.gameObject.SetActive(false);
         // gameOverScreen.SetActive(false);
@@ -92,10 +99,10 @@ public class GameSceneManager
 
         GameManager.Instance.Resetlevel();                                                                           //Reset All previous score to 0
 
-        GameManager.Instance.GetLevelInfoSOList()[GameManager.Instance.GetCurrentLevelSOIndex()]
+        GameManager.Instance.GetLevelInfoSOList()[GameManager.Instance.GetNextLevelSOIndex()]
                                                               .SetupGameSettings(GameManager.Instance);
+            Debug.Log("Load setup Scriptableobject: " + GameManager.Instance.GetLevelInfoSOList()[GameManager.Instance.GetNextLevelSOIndex()].GetLevelName());
 
-        // GameManager.Instance.GetLevelInfoSOList()[GameManager.Instance.GetCurrentLevelSOIndex()].SetIsUnlocked(true);
         GameManager.Instance.StartCoroutine(GetGameSceneLoadingProgress());
         GameManager.Instance.Resetlevel();
         GameManager.Instance.SetcurrentLevelIndex(GameManager.Instance.GetNextLevelIndex());

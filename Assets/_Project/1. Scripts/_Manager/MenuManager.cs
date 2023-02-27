@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MenuManager : MonoBehaviour
 {
@@ -27,15 +29,24 @@ public class MenuManager : MonoBehaviour
     [Space(10)]
     [SerializeField] Transform levelButtonPrefab;
     [SerializeField] Transform levelSelectContainer;
-
-
-
+ 
+    [SerializeField] TMPro.TMP_Dropdown dropdown;
     // AudioPoolSystem audioPoolSystem;
 
     private void Start()
     {
-        // audioPoolSystem = AudioPoolSystem.Singleton;
         OpenMenu("main");
+        List<string> strings = new List<string>();
+        dropdown.onValueChanged.AddListener(delegate { ApplyFPSTargetSetting(dropdown); });
+        
+#if UNITY_EDITOR
+
+        return;
+#endif
+#if !UNITY_EDITOR
+        ApplyFPSTargetSetting(dropdown);
+#endif
+
     }
 
     private void OnEnable()
@@ -119,4 +130,28 @@ public class MenuManager : MonoBehaviour
         OpenMenu(previousMenu);
     }
 
+    public void ApplyFPSTargetSetting(TMPro.TMP_Dropdown dropdown)
+    {
+        switch (dropdown.value)
+        {
+            case 0:
+                Application.targetFrameRate = 60;
+                break;
+
+            case 1:
+                Application.targetFrameRate = 30;
+                break;
+        }
+    }
+
+    public void ApplyMasterVolumeSetting()
+    {
+
+    }
+
+    public void ApplyMusicSetting()
+    {
+
+    }
 }
+ 

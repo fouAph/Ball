@@ -6,52 +6,59 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] GameState currentGameState;
-    [SerializeField] int currentLevelIndex;
-    private int currentLevelSOIndex { get { return currentLevelIndex - 2; } }
-    private int nextLevelIndex { get { return currentLevelIndex + 1; } }
-    private int nextLevelSOIndex { get { return currentLevelIndex - 1; } }
-    [SerializeField] private BallSpawner ballSpawner;
     public static GameManager Instance;
-
     private void Awake()
     {
         Instance = this;
     }
 
-    [SerializeField] GameSceneManager gameSceneManager;
-    [Header("Important Variables")]
     public GameSettings gameSettings;
+
+    [Space(10)]
+    [SerializeField] GameState currentGameState;
+    [SerializeField] Transform ballPrefab;
+    [SerializeField] Transform UIManagerPrefab;
+
+    [Space(10)]
+    [SerializeField] GameSceneManager gameSceneManager;
     [SerializeField] LevelInfoSO[] levelInfoSOList;
+
+    public Ball CurrentBall;
+    private UIManager uIManager;
+    private Transform ballSpawnPosition;
+    private Camera cam;
+
+    private List<GoalBucket> goalBuckets;
+    private int currentLevelStarScore = 0;
+
+    private int currentLevelIndex;
+    private int currentLevelSOIndex { get { return currentLevelIndex - 2; } }
+    private int nextLevelIndex { get { return currentLevelIndex + 1; } }
+    private int nextLevelSOIndex { get { return currentLevelIndex - 1; } }
 
     public event EventHandler onCurrentGoalCountChange;
     public event EventHandler onCurrentAttemptCountChange;
-
     public event EventHandler onGameLose;
     public event EventHandler onGameWin;
-
     public event EventHandler onDragEnd;
-
 
     private int currentAttemptCount;
     private int previousAttemptCount;
-
     private int goalCountToReach;
     private int currentGoalCount = 0;
     private int previousGoalCount;
 
-    public Ball CurrentBall;
 
-    private Camera cam;
+    [Header("Save Settings")]
+    public string saveName = "save";
+    public SaveData saveData;
+
     [NonSerialized] Vector2 startPoint;
     [NonSerialized] Vector2 endPoint;
     [NonSerialized] Vector2 direction;
     [NonSerialized] Vector2 force;
     [SerializeField] float distance;
     [NonSerialized] bool isDragging = false;
-
-    private List<GoalBucket> goalBuckets;
-    private int currentLevelStarScore = 0;
 
     private void Start()
     {
@@ -61,6 +68,7 @@ public class GameManager : MonoBehaviour
         onCurrentGoalCountChange += GameManager_OnCurrentGoalCountChange;
         onGameWin += OnGameWin_Event;
         cam = Camera.main;
+        LoadGameData();
         LoadGameMenu();
     }
 
@@ -127,21 +135,8 @@ public class GameManager : MonoBehaviour
 
     public void MainMenu_OnButtonClick()
     {
-        // SceneManager.UnloadSceneAsync(currentLevelIndex);
-        // SceneManager.LoadSceneAsync((int)SceneIndexes.TITLE_SCREEN, LoadSceneMode.Additive);
         SceneManager.LoadScene((int)SceneIndexes.MANAGER);
 
-    }
-
-    public void SetupGame()
-    {
-        ballSpawner = FindObjectOfType<BallSpawner>();
-        print("ball spawn");
-        cam = Camera.main;
-
-        var goals = FindObjectsOfType<GoalBucket>();
-        goalCountToReach = goals.Length;
-        PrepareNewBall();
     }
 
     #endregion
@@ -238,9 +233,33 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
+    public void PrepareGameLevel()
+    {
+        StartCoroutine(PrepareGameLevel_Coroutine());
+    }
+
+    private IEnumerator PrepareGameLevel_Coroutine()
+    {
+        while (ballSpawnPosition == null)
+        {
+            ballSpawnPosition = GameObject.FindGameObjectWithTag("BallSpawnPosition").transform;
+            if (ballSpawnPosition != null)
+            {
+                yield return null;
+            }
+        }
+        var ui = Instantiate(UIManagerPrefab, ballSpawnPosition);
+        ui.SetParent(null);
+        uIManager = ui.GetComponent<UIManager>();
+        var goals = FindObjectsOfType<GoalBucket>();
+        goalCountToReach = goals.Length;
+        yield return new WaitForSeconds(.5f);
+        PrepareNewBall();
+    }
+
     public void PrepareNewBall()
     {
-        GameObject ballGo = ballSpawner.SpawnBall();
+        GameObject ballGo = Instantiate(ballPrefab, ballSpawnPosition.position, Quaternion.identity).gameObject; ;
         ballGo.transform.parent = UIManager.Instance.transform;
         ballGo.transform.parent = null;
         CurrentBall = ballGo.GetComponent<Ball>();
@@ -262,18 +281,26 @@ public class GameManager : MonoBehaviour
             onGameWin?.Invoke(this, EventArgs.Empty);
             StopAllCoroutines();
         }
+
+
     }
 
     private void OnGameWin_Event(object sender, EventArgs e)
     {
+        //Set Current Level score 
         levelInfoSOList[currentLevelSOIndex].SetStarScore(currentLevelStarScore);
         if (levelInfoSOList.Length > nextLevelSOIndex)
-            levelInfoSOList[nextLevelSOIndex].SetIsUnlocked(true);
-
-        else
         {
-            //TODO : Change "Next Level Button To Main Menu Button
+            //Unlock next level on LevelInfoSO
+            levelInfoSOList[nextLevelSOIndex].SetIsUnlocked(true);
         }
+        // else
+        // {
+        //     //TODO : Change "Next Level Button To Main Menu Button
+        // }
+
+        //SaveData
+        SaveLevelData();
     }
 
     private void LevelFailed(string message = "")
@@ -341,6 +368,12 @@ public class GameManager : MonoBehaviour
         return currentLevelSOIndex;
     }
 
+    public int GetNextLevelSOIndex()
+    {
+        return nextLevelSOIndex;
+    }
+
+
     public void SetCurrentGoalCount()
     {
         currentGoalCount++;
@@ -367,24 +400,54 @@ public class GameManager : MonoBehaviour
         {
             currentLevelStarScore = 3;
         }
-
-
-
-
     }
 
-    #region SaveLoadGameData
-    public void LoadGameData()
+    #region SaveData, LoadData, ResetData 
+    // Save Level Data Data 
+    private void SaveLevelData()
     {
 
+        SaveData.Current.levels[currentLevelSOIndex].starScore = levelInfoSOList[currentLevelSOIndex].GetStarScore();
+        SaveData.Current.levels[nextLevelSOIndex].isUnlocked = levelInfoSOList[nextLevelSOIndex].GetIsUnlocked();
+        SerializationManager.Save(saveName, SaveData.Current);
     }
 
-    public void SaveGameData()
+    private void LoadGameData()
     {
+        SaveData save = SaveData.Current = (SaveData)SerializationManager.Load(Application.persistentDataPath + "/saves/" + saveName + ".save");
+        if (save != null)
+            saveData = save;
+        else
+        {
+            SaveData.Current = saveData;
+            SerializationManager.Save(saveName, SaveData.Current);
+            print("creating new save");
+        }
 
+        for (int i = 0; i < saveData.levels.Length; i++)
+        {
+            levelInfoSOList[i].SetStarScore(saveData.levels[i].starScore);
+            levelInfoSOList[i].SetIsUnlocked(saveData.levels[i].isUnlocked);
+        }
     }
 
+    public void ResetData()
+    {
+        var resetedData = saveData;
+        for (int i = 0; i < resetedData.levels.Length; i++)
+        {
+            resetedData.levels[i].starScore = 0;
+            if (i != 0)
+            {
+                levelInfoSOList[i].SetIsUnlocked(false);
+            }
+        }
+        saveData = resetedData;
+        SaveData.Current = saveData;
+        SerializationManager.Save(saveName, SaveData.Current);
+    }
     #endregion
+
 }
 
 public enum GameState { NEXT_ATTEMPT, WAITING, GAMEOVER_WIN, GAMEOVER_Lose }

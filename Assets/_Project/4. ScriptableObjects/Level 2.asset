@@ -19,4 +19,4 @@ MonoBehaviour:
   pushForce: 5
   isUnlocked: 1
   difficulityLevel: 0
-  starScore: 2
+  starScore: 1

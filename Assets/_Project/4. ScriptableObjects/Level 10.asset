@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e16e2a8cacf8c414c9519b8d30c25583, type: 3}
   m_Name: Level 10
   m_EditorClassIdentifier: 
-  levelBuildIndex: 8
+  levelBuildIndex: 11
   levelName: Level 10
   maxDragDistance: 3
   levelMaxAttempt: 3
