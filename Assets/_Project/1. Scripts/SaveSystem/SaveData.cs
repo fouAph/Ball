@@ -38,6 +38,7 @@ public class PlayerProfile
 [System.Serializable]
 public struct LevelSOData
 {
+    public string levelName;
     public int starScore;
     public bool isUnlocked;
 }

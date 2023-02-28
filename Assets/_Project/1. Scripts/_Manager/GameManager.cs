@@ -416,10 +416,21 @@ public class GameManager : MonoBehaviour
     {
         SaveData save = SaveData.Current = (SaveData)SerializationManager.Load(Application.persistentDataPath + "/saves/" + saveName + ".save");
         if (save != null)
+        {
             saveData = save;
+        }
         else
         {
             SaveData.Current = saveData;
+            SaveData.Current.levels = new LevelSOData[levelInfoSOList.Length];
+            for (int i = 0; i < levelInfoSOList.Length; i++)
+            {
+                SaveData.Current.levels[i].levelName = levelInfoSOList[i].GetLevelName();
+                if (i == 0)
+                {
+                    SaveData.Current.levels[i].isUnlocked = true;
+                }
+            }
             SerializationManager.Save(saveName, SaveData.Current);
             print("creating new save");
         }

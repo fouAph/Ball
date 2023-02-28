@@ -58,13 +58,10 @@ public class GameSceneManager
             }
         }
 
-        Debug.Log("Game Loaded");
         yield return new WaitForSeconds(.1f);
         GameManager.Instance.PrepareGameLevel();
-        // GameManager.Instance.SetupGame();
         yield return new WaitForSeconds(1f);
         loadingUIPanel.gameObject.SetActive(false);
-        // gameOverScreen.SetActive(false);
     }
 
     public void LoadGameMenu()
@@ -101,7 +98,6 @@ public class GameSceneManager
 
         GameManager.Instance.GetLevelInfoSOList()[GameManager.Instance.GetNextLevelSOIndex()]
                                                               .SetupGameSettings(GameManager.Instance);
-            Debug.Log("Load setup Scriptableobject: " + GameManager.Instance.GetLevelInfoSOList()[GameManager.Instance.GetNextLevelSOIndex()].GetLevelName());
 
         GameManager.Instance.StartCoroutine(GetGameSceneLoadingProgress());
         GameManager.Instance.Resetlevel();
