@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
@@ -93,7 +94,7 @@ public class GameManager : MonoBehaviour
 
         if (currentGameState != GameState.NEXT_ATTEMPT) return;
 
-        if (CurrentBall)
+        if (CurrentBall && EventSystem.current.IsPointerOverGameObject() == false)
         {
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {

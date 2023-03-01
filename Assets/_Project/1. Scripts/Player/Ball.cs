@@ -5,6 +5,8 @@ using UnityEngine;
 public class Ball : MonoBehaviour
 {
     [SerializeField] AudioClip[] collidedSFX;
+    [SerializeField] AudioClip[] ballPopSFX;
+    [SerializeField] ParticleSystem popBallParticleVFX;
     [SerializeField] AudioSource audioSource;
     public Vector3 pos { get { return transform.position; } }
 
@@ -42,6 +44,15 @@ public class Ball : MonoBehaviour
     public bool GetCollided()
     {
         return collided;
+    }
+
+    public void PopBall()
+    {
+        audioSource.PlayOneShot(ballPopSFX[Random.Range(0, collidedSFX.Length)]);
+        if (popBallParticleVFX)
+            popBallParticleVFX.Play();
+            
+        gameObject.SetActive(false);
     }
 
 }

@@ -22,6 +22,16 @@ public class UIManager : MonoBehaviour
     [SerializeField] string[] winTexts;
     [SerializeField] string[] loseTexts;
 
+    [SerializeField] GameObject pauseGamePopup;
+    [SerializeField] GameObject settingsGamePopup;
+    [Header("Pause Menu's Buttons")]
+    [SerializeField] Button pauseButton;
+    [SerializeField] Button resumeButton;
+    [SerializeField] Button restartButton;
+    [SerializeField] Button settingButton;
+    [SerializeField] Button mainMenuButton;
+
+
     private void Start()
     {
         HideLevelWinPopup();
@@ -30,9 +40,12 @@ public class UIManager : MonoBehaviour
         GameManager.Instance.onGameLose += ShowGameOverPopup_OnGameLose;
         GameManager.Instance.onGameWin += ShowGameOverPopup_OnGameWin;
 
-        // retryButton.onClick.AddListener(() => GameManager.Instance.Retry_OnButtonClick());
-        // mainMenuButton.onClick.AddListener(() => GameManager.Instance.MainMenu_OnButtonClick());
-        // nextLevelButton.onClick.AddListener(() => GameManager.Instance.NextLevel_OnButtonClick());
+        pauseButton.onClick.AddListener(() => PauseButton_OnButtonClick());
+        resumeButton.onClick.AddListener(() => PauseButton_OnButtonClick());
+
+        restartButton.onClick.AddListener(() => GameManager.Instance.Retry_OnButtonClick());
+        mainMenuButton.onClick.AddListener(() => GameManager.Instance.MainMenu_OnButtonClick());
+        settingButton.onClick.AddListener(() => SettingButton_OnButtonClick());
     }
 
     private void OnDisable()
@@ -41,29 +54,44 @@ public class UIManager : MonoBehaviour
         GameManager.Instance.onGameWin -= ShowGameOverPopup_OnGameWin;
     }
 
-    public void Retry_OnButtonClick()
+    [NonSerialized] bool pauseGamePopupisOpen = false;
+    public void PauseButton_OnButtonClick()
+    {
+        pauseGamePopupisOpen = !pauseGamePopupisOpen;
+        pauseGamePopup.SetActive(pauseGamePopupisOpen);
+
+    }
+
+    [NonSerialized] bool settingsGamePopupisOpen;
+    public void SettingButton_OnButtonClick()
+    {
+        settingsGamePopupisOpen = !settingsGamePopupisOpen;
+        settingsGamePopup.SetActive(settingsGamePopupisOpen);
+    }
+
+    private void Retry_OnButtonClick()
     {
         GameManager.Instance.Retry_OnButtonClick();
     }
 
-    public void MainMenu_OnButtonClick()
+    private void MainMenu_OnButtonClick()
     {
         GameManager.Instance.MainMenu_OnButtonClick();
     }
 
-    public void NextLevel_OnButtonClick()
+    private void NextLevel_OnButtonClick()
     {
         GameManager.Instance.NextLevel_OnButtonClick();
     }
 
-    public void ShowGameOverPopup_OnGameLose(object sender, EventArgs e)
+    private void ShowGameOverPopup_OnGameLose(object sender, EventArgs e)
     {
         HideLevelWinPopup();
         ShowLevelFailedPopup();
         SpawnStars();
     }
 
-    public void ShowGameOverPopup_OnGameWin(object sender, EventArgs e)
+    private void ShowGameOverPopup_OnGameWin(object sender, EventArgs e)
     {
         HideLevelFailedPopup();
         ShowLevelWinPopup();
@@ -102,7 +130,7 @@ public class UIManager : MonoBehaviour
         for (int i = 0; i < starsContainer.childCount; i++)
         {
             Image img = starsContainer.GetChild(i).GetComponent<Image>();
-           if (count <  GameManager.Instance.GetStarsResult())
+            if (count < GameManager.Instance.GetStarsResult())
             {
                 img.sprite = filledStarSprite;
             }
@@ -111,8 +139,9 @@ public class UIManager : MonoBehaviour
             {
                 img.sprite = emptyStarSprite;
             }
-  
+
             count++;
         }
     }
+
 }

@@ -15,7 +15,7 @@ MonoBehaviour:
   levelBuildIndex: 9
   levelName: Level 8
   maxDragDistance: 3
-  levelMaxAttempt: 3
+  levelMaxAttempt: 6
   pushForce: 4.7
   isUnlocked: 0
   difficulityLevel: 0

@@ -234,21 +234,7 @@ MonoBehaviour:
   saveData:
     profile:
       playerName: 
-    levels:
-    - starScore: 0
-      isUnlocked: 1
-    - starScore: 3
-      isUnlocked: 0
-    - starScore: 0
-      isUnlocked: 0
-    - starScore: 0
-      isUnlocked: 0
-    - starScore: 0
-      isUnlocked: 0
-    - starScore: 0
-      isUnlocked: 0
-    - starScore: 0
-      isUnlocked: 0
+    levels: []
   distance: 0
 --- !u!4 &271288800
 Transform:
@@ -422,7 +408,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be0d463a6712dbf459d335bfa9490e7e, type: 3}
   m_Name: 
