@@ -145,3 +145,43 @@ public class UIManager : MonoBehaviour
     }
 
 }
+
+public class AudioManager : MonoBehaviour
+{
+    public static AudioManager Instance;
+    [SerializeField] float masterVolume = 1f;
+    [SerializeField] SFXManager sfxManager;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    public void PlaySoundEffect(AudioClip sfxClip, float volume = 1f)
+    {
+        sfxManager.PlaySoundEffect(sfxClip, volume);
+    }
+
+    public void PlaySoundEffect(AudioSource source, AudioClip sfxClip, float volume = 1f)
+    {
+        sfxManager.PlaySoundEffect(source, sfxClip, volume);
+    }
+
+    [System.Serializable]
+    private class SFXManager
+    {
+        public AudioSource soundEffectSource;
+        [SerializeField] float sfxVolume;
+        public void PlaySoundEffect(AudioClip sfxClip, float volume = 1f)
+        {
+            soundEffectSource.volume = volume * sfxVolume * AudioManager.Instance.masterVolume;
+            soundEffectSource.PlayOneShot(sfxClip);
+        }
+
+        public void PlaySoundEffect(AudioSource source, AudioClip sfxClip, float volume = 1f)
+        {
+            source.volume = volume * sfxVolume * AudioManager.Instance.masterVolume;
+            source.PlayOneShot(sfxClip);
+        }
+    }
+}

@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
         Instance = this;
     }
 
+    public BallPrefabToPool ballPrefabToPool;
     public GameSettings gameSettings;
 
     [Space(10)]
@@ -63,6 +64,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+
         goalBuckets = new List<GoalBucket>();
         currentAttemptCount = gameSettings.maxAttempt;
         onCurrentAttemptCountChange += GameManager_OnCurrentAttemptCountChange;
@@ -71,6 +73,7 @@ public class GameManager : MonoBehaviour
         cam = Camera.main;
         LoadGameData();
         LoadGameMenu();
+        StartCoroutine(ballPrefabToPool.PopulateAllBall());
     }
 
     public void Resetlevel()
@@ -80,6 +83,7 @@ public class GameManager : MonoBehaviour
         goalBuckets = FindObjectsOfType<GoalBucket>().ToList();
         goalCountToReach = goalBuckets.Count;
         currentGoalCount = 0;
+        HideAllShootedBall();
     }
 
     private void Update()
@@ -258,11 +262,21 @@ public class GameManager : MonoBehaviour
         PrepareNewBall();
     }
 
-    public void PrepareNewBall()
+    [SerializeField] List<GameObject> ShootedBalls = new List<GameObject>();
+    public void HideAllShootedBall()
     {
-        GameObject ballGo = Instantiate(ballPrefab, ballSpawnPosition.position, Quaternion.identity).gameObject; ;
-        ballGo.transform.parent = UIManager.Instance.transform;
-        ballGo.transform.parent = null;
+        foreach (var item in ShootedBalls)
+        {
+            item.SetActive(false);
+        }
+        ShootedBalls.Clear();
+    }
+    private void PrepareNewBall()
+    {
+        GameObject ballGo = PoolSystem.Instance.SpawnFromPool(ballPrefab.gameObject, ballSpawnPosition.position, Quaternion.identity);
+        ShootedBalls.Add(ballGo);
+        // ballGo.transform.parent = UIManager.Instance.transform;
+        // ballGo.transform.parent = null;
         CurrentBall = ballGo.GetComponent<Ball>();
         CurrentBall.DeactiveRb();
 
@@ -475,5 +489,25 @@ public class GameSettings
     [Range(0f, 1f)]
     public float minimumDragPercent = .2f;
     public Trajectory trajectory;
+}
+
+[System.Serializable]
+public class BallPrefabToPool
+{
+    [SerializeField] List<GameObject> BallPrefabs;
+    public IEnumerator PopulateAllBall()
+    {
+        yield return new WaitForSeconds(1f);
+        if (PoolSystem.Instance != null)
+        {
+            foreach (var ball in BallPrefabs)
+            {
+                var obj = PoolSystem.Instance.AddObjectToPooledObject(ball, 7, GameManager.Instance.transform, ball.name);
+
+            }
+
+        }
+    }
+
 
 }
