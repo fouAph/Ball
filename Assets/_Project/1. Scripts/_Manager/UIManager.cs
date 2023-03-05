@@ -12,6 +12,7 @@ public class UIManager : MonoBehaviour
 
     [SerializeField] GameHUD gameHUD;
     [SerializeField] GameObject levelWinPopup;
+    [SerializeField] GameObject nextLevelButton;
     [SerializeField] GameObject levelFailedPopup;
 
     [SerializeField] Transform starsContainer;
@@ -144,6 +145,10 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public GameObject GetNextLevelButton()
+    {
+        return nextLevelButton;
+    }
 }
 
 public class AudioManager : MonoBehaviour

@@ -61,8 +61,7 @@ public class PoolSystem : MonoBehaviour
 
             }
 
-            poolDict.Add(newTag, objPool);
-            // print($"{prefab.name} has been added to the Poolsystem Collection");
+            poolDict.Add(newTag, objPool); 
             return prefab;
         }
 

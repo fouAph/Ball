@@ -14,8 +14,6 @@ public class GameSceneManager
         Instance = this;
     }
 
-    public event EventHandler onLevelLoaded;
-
     [SerializeField] GameObject loadingUIPanel;
     List<AsyncOperation> sceneLoading = new List<AsyncOperation>();
 
@@ -29,23 +27,16 @@ public class GameSceneManager
         GameManager.Instance.StartCoroutine(GetGameSceneLoadingProgress());
         GameManager.Instance.Resetlevel();
         GameManager.Instance.SetcurrentLevelIndex(levelInfoSO.GetLevelBuildIndex());
-        // StartCoroutine(SetupGameReference());
-        // StartCoroutine(StartGameCountdown());
     }
-
-
 
     public void RetryLevel()
     {
         sceneLoading.Clear();
         loadingUIPanel.SetActive(true);
-        // ResetCurrentGameProgress();
         sceneLoading.Add(SceneManager.UnloadSceneAsync(GameManager.Instance.GetCurrentLevelIndex()));
         sceneLoading.Add(SceneManager.LoadSceneAsync(GameManager.Instance.GetCurrentLevelIndex(), LoadSceneMode.Additive));
         GameManager.Instance.StartCoroutine(GetGameSceneLoadingProgress());
         GameManager.Instance.Resetlevel();
-        // StartCoroutine(SetupGameReference());
-        // StartCoroutine(StartGameCountdown());
     }
 
     public IEnumerator GetGameSceneLoadingProgress()
@@ -73,7 +64,7 @@ public class GameSceneManager
         GameManager.Instance.StartCoroutine(GetSceneLoadingProgress());
     }
 
-    public IEnumerator GetSceneLoadingProgress()
+    private IEnumerator GetSceneLoadingProgress()
     {
         for (int i = 0; i < sceneLoading.Count; i++)
         {
@@ -95,7 +86,6 @@ public class GameSceneManager
         sceneLoading.Add(SceneManager.LoadSceneAsync(GameManager.Instance.GetNextLevelIndex(), LoadSceneMode.Additive));   //Load next level
 
         GameManager.Instance.Resetlevel();                                                                           //Reset All previous score to 0
-
         GameManager.Instance.GetLevelInfoSOList()[GameManager.Instance.GetNextLevelSOIndex()]
                                                               .SetupGameSettings(GameManager.Instance);
 
@@ -108,13 +98,9 @@ public class GameSceneManager
     {
         sceneLoading.Clear();
         loadingUIPanel.SetActive(true);
-        // ResetCurrentGameProgress();
         sceneLoading.Add(SceneManager.UnloadSceneAsync(GameManager.Instance.GetCurrentLevelIndex()));
         sceneLoading.Add(SceneManager.LoadSceneAsync(GameManager.Instance.GetCurrentLevelIndex(), LoadSceneMode.Additive));
         GameManager.Instance.StartCoroutine(GetGameSceneLoadingProgress());
-        // StartCoroutine(SetupGameReference());
-        // StartCoroutine(StartGameCountdown());
-
     }
 
     public GameObject GetLoadingGameObject()

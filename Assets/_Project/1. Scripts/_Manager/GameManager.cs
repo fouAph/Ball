@@ -213,10 +213,9 @@ public class GameManager : MonoBehaviour
     private IEnumerator InitiateGameLose()
     {
         yield return new WaitForSeconds(gameSettings.waitTimeWhenOutofBall);
-        // print("GameOver");
         if (currentGameState != GameState.GAMEOVER_WIN)
         {
-            LevelFailed("Out of attempt");
+            LevelFailed();
             currentLevelStarScore = 0;
             onGameLose?.Invoke(this, EventArgs.Empty);
         }
@@ -271,12 +270,12 @@ public class GameManager : MonoBehaviour
         }
         ShootedBalls.Clear();
     }
+
     private void PrepareNewBall()
     {
         GameObject ballGo = PoolSystem.Instance.SpawnFromPool(ballPrefab.gameObject, ballSpawnPosition.position, Quaternion.identity);
         ShootedBalls.Add(ballGo);
-        // ballGo.transform.parent = UIManager.Instance.transform;
-        // ballGo.transform.parent = null;
+
         CurrentBall = ballGo.GetComponent<Ball>();
         CurrentBall.DeactiveRb();
 
@@ -296,8 +295,6 @@ public class GameManager : MonoBehaviour
             onGameWin?.Invoke(this, EventArgs.Empty);
             StopAllCoroutines();
         }
-
-
     }
 
     private void OnGameWin_Event(object sender, EventArgs e)
@@ -308,17 +305,18 @@ public class GameManager : MonoBehaviour
         {
             //Unlock next level on LevelInfoSO
             levelInfoSOList[nextLevelSOIndex].SetIsUnlocked(true);
+
         }
-        // else
-        // {
-        //     //TODO : Change "Next Level Button To Main Menu Button
-        // }
+        else
+        {
+            uIManager.GetNextLevelButton().SetActive(false);
+        }
 
         //SaveData
         SaveLevelData();
     }
 
-    private void LevelFailed(string message = "")
+    private void LevelFailed()
     {
         currentGameState = GameState.GAMEOVER_Lose;
         onGameLose?.Invoke(this, EventArgs.Empty);
@@ -423,7 +421,8 @@ public class GameManager : MonoBehaviour
     {
 
         SaveData.Current.levels[currentLevelSOIndex].starScore = levelInfoSOList[currentLevelSOIndex].GetStarScore();
-        SaveData.Current.levels[nextLevelSOIndex].isUnlocked = levelInfoSOList[nextLevelSOIndex].GetIsUnlocked();
+        if (levelInfoSOList.Length > nextLevelSOIndex)
+            SaveData.Current.levels[nextLevelSOIndex].isUnlocked = levelInfoSOList[nextLevelSOIndex].GetIsUnlocked();
         SerializationManager.Save(saveName, SaveData.Current);
     }
 
